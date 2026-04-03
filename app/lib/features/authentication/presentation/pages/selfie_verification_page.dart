@@ -21,8 +21,8 @@ import '../bloc/auth_bloc.dart';
 import '../bloc/events/auth_events.dart';
 import '../bloc/states/auth_states.dart';
 
-/// Análise pós-liveness: timer visual enquanto [LivenessAnalysisLoading];
-/// ao receber sucesso ou falha do [AuthBloc], anima para o ícone correspondente.
+/// Análise pós-liveness: timer na análise; após o [AuthBloc] concluir, respeita
+/// tempos mínimos antes dos ícones e antes de navegar.
 @RoutePage(deferredLoading: true)
 class SelfieVerificationPage extends StatefulWidget {
   const SelfieVerificationPage({super.key});
@@ -30,8 +30,14 @@ class SelfieVerificationPage extends StatefulWidget {
   /// Duração da fase “analisando” (UI). A conclusão real vem do [AuthBloc].
   static const int mockCountdownSeconds = 60;
 
-  /// Espera após o [AuthBloc] emitir sucesso/erro antes de mostrar o ícone.
-  static const Duration resultIconRevealDelay = Duration(seconds: 2);
+  /// Tempo mínimo com a tela de timer desde a abertura da página.
+  static const Duration minimumTimerVisibleDuration = Duration(seconds: 3);
+
+  /// Após a API responder, permanece na análise (timer) por este tempo.
+  static const Duration postResultAnalyzingHold = Duration(seconds: 1);
+
+  /// Com o ícone de sucesso/erro visível antes de redirecionar ou voltar.
+  static const Duration postIconNavigationDelay = Duration(milliseconds: 2300);
 
   @override
   State<SelfieVerificationPage> createState() => _SelfieVerificationPageState();
@@ -42,9 +48,9 @@ enum _VerificationPhase { analyzing, success, error }
 class _SelfieVerificationPageState extends State<SelfieVerificationPage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _countdownController;
+  late final DateTime _pageOpenedAt;
   _VerificationPhase _phase = _VerificationPhase.analyzing;
-  Timer? _errorExitTimer;
-  Timer? _resultIconDelayTimer;
+  Timer? _outcomeChainTimer;
   bool _analysisOutcomeHandlingStarted = false;
   AuthBloc? _authBloc;
   String? _errorDetail;
@@ -52,12 +58,43 @@ class _SelfieVerificationPageState extends State<SelfieVerificationPage>
   @override
   void initState() {
     super.initState();
+    _pageOpenedAt = DateTime.now();
     final total = SelfieVerificationPage.mockCountdownSeconds;
     _countdownController = AnimationController(
       vsync: this,
       duration: Duration(seconds: total),
     );
     _countdownController.forward();
+  }
+
+  void _cancelOutcomeChain() {
+    _outcomeChainTimer?.cancel();
+    _outcomeChainTimer = null;
+  }
+
+  /// Garante ≥ [minimumTimerVisibleDuration] desde [_pageOpenedAt], depois
+  /// [postResultAnalyzingHold] ainda em análise, ícones, [postIconNavigationDelay], [onEnd].
+  void _runOutcomeSequence({required void Function() showIconsAndThenEnd}) {
+    _cancelOutcomeChain();
+
+    final elapsed = DateTime.now().difference(_pageOpenedAt);
+    final waitMinTimer = SelfieVerificationPage.minimumTimerVisibleDuration -
+        elapsed;
+    final phase1 = waitMinTimer.isNegative ? Duration.zero : waitMinTimer;
+
+    _outcomeChainTimer = Timer(phase1, () {
+      _outcomeChainTimer = null;
+      if (!mounted) return;
+      _outcomeChainTimer = Timer(
+        SelfieVerificationPage.postResultAnalyzingHold,
+        () {
+          _outcomeChainTimer = null;
+          if (!mounted) return;
+          _countdownController.stop();
+          showIconsAndThenEnd();
+        },
+      );
+    });
   }
 
   @override
@@ -89,46 +126,54 @@ class _SelfieVerificationPageState extends State<SelfieVerificationPage>
       return;
     }
     _analysisOutcomeHandlingStarted = true;
-    _countdownController.stop();
     final passed = state.result.passed;
     final failureDetail =
         state.result.failureReason ?? 'Verificação não aprovada.';
-    _resultIconDelayTimer?.cancel();
-    _resultIconDelayTimer = Timer(SelfieVerificationPage.resultIconRevealDelay, () {
-      _resultIconDelayTimer = null;
-      if (!mounted) return;
-      if (_phase != _VerificationPhase.analyzing) return;
-      setState(() {
-        _phase = passed ? _VerificationPhase.success : _VerificationPhase.error;
-        _errorDetail = passed ? null : failureDetail;
-      });
-      if (passed) {
-        final uid = getIt<AuthService>().currentUser?.uid;
-        if (uid != null && uid.isNotEmpty) {
-          context.read<UsersBloc>().add(
-                UpdateUserOnboardingStepSubmitted(
-                  userId: uid,
-                  onboardingStep: OnboardingStep.permissions,
-                ),
-              );
-          if (!mounted) return;
-          context.router.replace(
-            AuthLoadingRoute(
-              cpfMasked: '',
-              awaitingOnboardingStepUpdate: true,
-            ),
-          );
-        } else {
-          appScaffoldMessengerKey.currentState?.showSnackBar(
-            const SnackBar(
-              content: Text('Sessão inválida. Faça login novamente.'),
-            ),
-          );
-        }
-      } else {
-        _scheduleErrorExit();
-      }
-    });
+
+    _runOutcomeSequence(
+      showIconsAndThenEnd: () {
+        if (!mounted) return;
+        setState(() {
+          _phase =
+              passed ? _VerificationPhase.success : _VerificationPhase.error;
+          _errorDetail = passed ? null : failureDetail;
+        });
+
+        _outcomeChainTimer = Timer(
+          SelfieVerificationPage.postIconNavigationDelay,
+          () {
+            _outcomeChainTimer = null;
+            if (!mounted) return;
+            if (passed) {
+              final uid = getIt<AuthService>().currentUser?.uid;
+              if (uid != null && uid.isNotEmpty) {
+                context.read<UsersBloc>().add(
+                      UpdateUserOnboardingStepSubmitted(
+                        userId: uid,
+                        onboardingStep: OnboardingStep.permissions,
+                      ),
+                    );
+                if (!mounted) return;
+                context.router.replace(
+                  AuthLoadingRoute(
+                    cpfMasked: '',
+                    awaitingOnboardingStepUpdate: true,
+                  ),
+                );
+              } else {
+                appScaffoldMessengerKey.currentState?.showSnackBar(
+                  const SnackBar(
+                    content: Text('Sessão inválida. Faça login novamente.'),
+                  ),
+                );
+              }
+            } else {
+              unawaited(_popBackToSelfieSubmission());
+            }
+          },
+        );
+      },
+    );
   }
 
   void _applyAnalysisFailure({required String message}) {
@@ -138,27 +183,25 @@ class _SelfieVerificationPageState extends State<SelfieVerificationPage>
       return;
     }
     _analysisOutcomeHandlingStarted = true;
-    _countdownController.stop();
-    _resultIconDelayTimer?.cancel();
-    _resultIconDelayTimer = Timer(SelfieVerificationPage.resultIconRevealDelay, () {
-      _resultIconDelayTimer = null;
-      if (!mounted) return;
-      if (_phase != _VerificationPhase.analyzing) return;
-      setState(() {
-        _phase = _VerificationPhase.error;
-        _errorDetail = message;
-      });
-      _scheduleErrorExit();
-    });
-  }
 
-  void _scheduleErrorExit() {
-    _errorExitTimer?.cancel();
-    _errorExitTimer = Timer(const Duration(seconds: 2), () {
-      _errorExitTimer = null;
-      if (!mounted) return;
-      unawaited(_popBackToSelfieSubmission());
-    });
+    _runOutcomeSequence(
+      showIconsAndThenEnd: () {
+        if (!mounted) return;
+        setState(() {
+          _phase = _VerificationPhase.error;
+          _errorDetail = message;
+        });
+
+        _outcomeChainTimer = Timer(
+          SelfieVerificationPage.postIconNavigationDelay,
+          () {
+            _outcomeChainTimer = null;
+            if (!mounted) return;
+            unawaited(_popBackToSelfieSubmission());
+          },
+        );
+      },
+    );
   }
 
   /// Remove [SelfieVerificationRoute] e [SelfieLivenessRoute] da pilha.
@@ -171,8 +214,7 @@ class _SelfieVerificationPageState extends State<SelfieVerificationPage>
 
   @override
   void dispose() {
-    _errorExitTimer?.cancel();
-    _resultIconDelayTimer?.cancel();
+    _cancelOutcomeChain();
     _countdownController.dispose();
     _authBloc?.add(const LivenessAnalysisReset());
     super.dispose();
