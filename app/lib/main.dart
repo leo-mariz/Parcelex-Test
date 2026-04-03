@@ -60,6 +60,7 @@ Future<void> main() async {
     authService: getIt<AuthService>(),
     getUserUseCase: getUserUseCase,
     updateUserUseCase: updateUserUseCase,
+    updateUserOnboardingStepUseCase: updateUserOnboardingStepUseCase,
   );
   final usersBloc = createUsersBloc(
     updateUserOnboardingStepUseCase: updateUserOnboardingStepUseCase,
