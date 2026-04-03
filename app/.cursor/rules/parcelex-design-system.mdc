@@ -1,0 +1,44 @@
+---
+description: Parcelex — espaçamentos e tamanhos via design system (sem números soltos)
+globs: app/lib/**/*.dart,lib/**/*.dart
+alwaysApply: false
+---
+
+# Design system (Parcelex)
+
+Ao definir **espaçamentos, tamanhos de layout, raios, ícones e paddings** em Dart (widgets, páginas, temas), **não use valores numéricos literais** como `8`, `16`, `SizedBox(height: 24)` etc., exceto quando explicitamente indicado abaixo.
+
+## O que usar
+
+1. **`DSSize.width(double)` / `DSSize.height(double)`** — qualquer dimensão derivada do canvas Figma (375×812), com escala e clamp para tablet. Use para:
+   - `SizedBox`, `width`/`height` de containers
+   - `BorderRadius.circular(...)` em componentes
+   - tamanhos de ícone (`Icon(size: …)`)
+   - `strokeWidth` de bordas/progress quando fizer sentido escalar
+
+2. **`DSPadding.horizontal(double)` / `DSPadding.vertical(double)`** — paddings e gaps que devem acompanhar a escala (equivalente ao Figma em eixo X ou Y).
+
+3. **`AppSpacing`** — tokens já nomeados do produto:
+   - `pageHorizontal`, `sectionGap`, `contentMaxWidth`, `loginHeroHeight`, etc.
+   - `gapXs`, `gapSm`, `stickyFooterBottom` quando couber semanticamente
+
+## Exceções (pode ser literal)
+
+- **`TextStyle.height`** (entrelinha) é **múltiplo da fonte**, não dp: use `1.2`, `1.35`, etc. **Sem** `DSSize`.
+- **`Duration`**, opacidades (`alpha`), **flex / aspectRatio** puros.
+- Valores **0** ou **1** estruturais (`Expanded`, `flex: 1`, `SizedBox.shrink()`).
+- APIs do Material que exigem constante em compile-time rara — prefira resolver no `build` com DS.
+
+## Imports
+
+De `lib/core/presentation/...` prefira paths **relativos** até `design_system/`:
+
+`import '../../design_system/ds_size.dart';`  
+`import '../../design_system/ds_padding.dart';`  
+`import '../../design_system/app_spacing.dart';`
+
+Evite `package:app/...` para o design system salvo convenção do projeto.
+
+## Novos componentes
+
+Antes de introduzir um número novo, verifique se já existe token em `AppSpacing` ou se basta `DSSize`/`DSPadding` com o valor base do Figma.

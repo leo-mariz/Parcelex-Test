@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "158947269277",
+    "project_id": "parceleo-fd28b",
+    "storage_bucket": "parceleo-fd28b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:158947269277:android:85aa0823ec2c12f00cd274",
+        "android_client_info": {
+          "package_name": "com.parceleo.teste"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxCXfEyQaB9qf2VzQwdJSpoa2ewWba1pw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
