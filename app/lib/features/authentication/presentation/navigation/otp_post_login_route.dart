@@ -13,15 +13,13 @@ PageRouteInfo<Object?> routeAfterOtpSuccess({UserEntity? userProfile}) {
 
   switch (step) {
     case OnboardingStep.none:
-    case OnboardingStep.emailOtpPending:
-    case OnboardingStep.profileComplete:
     case OnboardingStep.selfie:
       return const SelfieSubmissionRoute();
-    case OnboardingStep.liveness:
-    case OnboardingStep.verification:
     case OnboardingStep.permissions:
       return const NotificationPermissionRoute();
     case OnboardingStep.done:
+      return const HomePlaceholderRoute();
+    default:
       return const HomePlaceholderRoute();
   }
 }
