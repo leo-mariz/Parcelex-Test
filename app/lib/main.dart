@@ -1,4 +1,5 @@
 import 'package:app/core/config/bloc_factories.dart';
+import 'package:app/core/config/setup_app_check.dart';
 import 'package:app/core/config/setup_locator.dart';
 import 'package:app/core/services/auth_functions.dart';
 import 'package:app/core/services/auth_services.dart';
@@ -32,6 +33,7 @@ final _appRouter = AppRouter();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await setupFirebaseAppCheck();
   await AutoCacheInitializer.initialize();
   setupLocator();
 
