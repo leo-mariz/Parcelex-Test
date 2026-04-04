@@ -48,7 +48,6 @@ class AuthLoadingRoute extends _i12.PageRouteInfo<AuthLoadingRouteArgs> {
     required String cpfMasked,
     bool isRegisterOnboarding = false,
     bool awaitingLivenessInit = false,
-    bool awaitingOnboardingStepUpdate = false,
     bool awaitingUserPermissionsUpdate = false,
     _i14.PermissionsDto? permissionsDto,
     List<_i12.PageRouteInfo>? children,
@@ -60,7 +59,6 @@ class AuthLoadingRoute extends _i12.PageRouteInfo<AuthLoadingRouteArgs> {
            cpfMasked: cpfMasked,
            isRegisterOnboarding: isRegisterOnboarding,
            awaitingLivenessInit: awaitingLivenessInit,
-           awaitingOnboardingStepUpdate: awaitingOnboardingStepUpdate,
            awaitingUserPermissionsUpdate: awaitingUserPermissionsUpdate,
            permissionsDto: permissionsDto,
          ),
@@ -81,7 +79,6 @@ class AuthLoadingRoute extends _i12.PageRouteInfo<AuthLoadingRouteArgs> {
           cpfMasked: args.cpfMasked,
           isRegisterOnboarding: args.isRegisterOnboarding,
           awaitingLivenessInit: args.awaitingLivenessInit,
-          awaitingOnboardingStepUpdate: args.awaitingOnboardingStepUpdate,
           awaitingUserPermissionsUpdate: args.awaitingUserPermissionsUpdate,
           permissionsDto: args.permissionsDto,
         ),
@@ -97,7 +94,6 @@ class AuthLoadingRouteArgs {
     required this.cpfMasked,
     this.isRegisterOnboarding = false,
     this.awaitingLivenessInit = false,
-    this.awaitingOnboardingStepUpdate = false,
     this.awaitingUserPermissionsUpdate = false,
     this.permissionsDto,
   });
@@ -112,15 +108,13 @@ class AuthLoadingRouteArgs {
 
   final bool awaitingLivenessInit;
 
-  final bool awaitingOnboardingStepUpdate;
-
   final bool awaitingUserPermissionsUpdate;
 
   final _i14.PermissionsDto? permissionsDto;
 
   @override
   String toString() {
-    return 'AuthLoadingRouteArgs{key: $key, center: $center, cpfMasked: $cpfMasked, isRegisterOnboarding: $isRegisterOnboarding, awaitingLivenessInit: $awaitingLivenessInit, awaitingOnboardingStepUpdate: $awaitingOnboardingStepUpdate, awaitingUserPermissionsUpdate: $awaitingUserPermissionsUpdate, permissionsDto: $permissionsDto}';
+    return 'AuthLoadingRouteArgs{key: $key, center: $center, cpfMasked: $cpfMasked, isRegisterOnboarding: $isRegisterOnboarding, awaitingLivenessInit: $awaitingLivenessInit, awaitingUserPermissionsUpdate: $awaitingUserPermissionsUpdate, permissionsDto: $permissionsDto}';
   }
 
   @override
@@ -132,7 +126,6 @@ class AuthLoadingRouteArgs {
         cpfMasked == other.cpfMasked &&
         isRegisterOnboarding == other.isRegisterOnboarding &&
         awaitingLivenessInit == other.awaitingLivenessInit &&
-        awaitingOnboardingStepUpdate == other.awaitingOnboardingStepUpdate &&
         awaitingUserPermissionsUpdate == other.awaitingUserPermissionsUpdate &&
         permissionsDto == other.permissionsDto;
   }
@@ -144,7 +137,6 @@ class AuthLoadingRouteArgs {
       cpfMasked.hashCode ^
       isRegisterOnboarding.hashCode ^
       awaitingLivenessInit.hashCode ^
-      awaitingOnboardingStepUpdate.hashCode ^
       awaitingUserPermissionsUpdate.hashCode ^
       permissionsDto.hashCode;
 }

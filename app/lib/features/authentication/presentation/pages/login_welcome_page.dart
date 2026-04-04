@@ -5,7 +5,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/config/app_router.gr.dart';
-import '../../../../core/presentation/app_scaffold_messenger.dart';
+import '../../../../core/presentation/notifications/app_notifications.dart';
 import '../../../../core/utils/cpf_digits_validator.dart';
 import '../../../../core/design_system/app_typography.dart';
 import '../../../../core/design_system/app_spacing.dart';
@@ -37,9 +37,7 @@ class _LoginWelcomePageState extends State<LoginWelcomePage> {
   }
 
   void _showSnack(String message) {
-    appScaffoldMessengerKey.currentState?.showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    showAppWarning(message);
   }
 
   void _onContinue() {

@@ -1,4 +1,4 @@
-import 'package:app/features/authentication/data/dtos/liveness_dto.dart';
+import 'package:app/features/liveness/data/dtos/liveness_dto.dart';
 import 'package:app/features/authentication/data/dtos/login_dto.dart';
 import 'package:app/features/authentication/data/dtos/onboarding_dto.dart';
 import 'package:app/features/permissions/data/dtos/permissions_dto.dart';
@@ -85,9 +85,9 @@ final class InitLivenessSessionReset extends AuthEvent {
   const InitLivenessSessionReset();
 }
 
-// —— LivenessAnalysisUseCase ——
-final class LivenessAnalysisRequested extends AuthEvent {
-  const LivenessAnalysisRequested(this.dto);
+// —— SendLivenessUseCase ——
+final class SendLivenessRequested extends AuthEvent {
+  const SendLivenessRequested(this.dto);
 
   final LivenessDto dto;
 
@@ -95,8 +95,17 @@ final class LivenessAnalysisRequested extends AuthEvent {
   List<Object?> get props => [dto];
 }
 
-final class LivenessAnalysisReset extends AuthEvent {
-  const LivenessAnalysisReset();
+final class SendLivenessReset extends AuthEvent {
+  const SendLivenessReset();
+}
+
+// —— LogoutUseCase ——
+final class LogoutRequested extends AuthEvent {
+  const LogoutRequested();
+}
+
+final class LogoutReset extends AuthEvent {
+  const LogoutReset();
 }
 
 // —— EnableCameraPermissionUseCase ——

@@ -1188,6 +1188,10 @@ PODS:
     - abseil/meta/type_traits
     - abseil/xcprivacy
   - abseil/xcprivacy (1.20240722.0)
+  - AppCheckCore (11.2.0):
+    - GoogleUtilities/Environment (~> 8.0)
+    - GoogleUtilities/UserDefaults (~> 8.0)
+    - PromisesObjC (~> 2.4)
   - BoringSSL-GRPC (0.0.37):
     - BoringSSL-GRPC/Implementation (= 0.0.37)
     - BoringSSL-GRPC/Interface (= 0.0.37)
@@ -1217,6 +1221,11 @@ PODS:
   - Firebase/Functions (12.9.0):
     - Firebase/CoreOnly
     - FirebaseFunctions (~> 12.9.0)
+  - firebase_app_check (0.4.2):
+    - Firebase/CoreOnly (~> 12.9.0)
+    - firebase_core
+    - FirebaseAppCheck (~> 12.9.0)
+    - Flutter
   - firebase_auth (6.3.0):
     - Firebase/Auth (= 12.9.0)
     - firebase_core
@@ -1224,6 +1233,12 @@ PODS:
   - firebase_core (4.6.0):
     - Firebase/CoreOnly (= 12.9.0)
     - Flutter
+  - FirebaseAppCheck (12.9.0):
+    - AppCheckCore (~> 11.0)
+    - FirebaseAppCheckInterop (~> 12.9.0)
+    - FirebaseCore (~> 12.9.0)
+    - GoogleUtilities/Environment (~> 8.1)
+    - GoogleUtilities/UserDefaults (~> 8.1)
   - FirebaseAppCheckInterop (12.9.0)
   - FirebaseAuth (12.9.0):
     - FirebaseAppCheckInterop (~> 12.9.0)
@@ -1455,6 +1470,7 @@ DEPENDENCIES:
   - cloud_firestore (from `.symlinks/plugins/cloud_firestore/ios`)
   - cloud_functions (from `.symlinks/plugins/cloud_functions/ios`)
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
+  - firebase_app_check (from `.symlinks/plugins/firebase_app_check/ios`)
   - firebase_auth (from `.symlinks/plugins/firebase_auth/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - Flutter (from `Flutter`)
@@ -1469,8 +1485,10 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - abseil
+    - AppCheckCore
     - BoringSSL-GRPC
     - Firebase
+    - FirebaseAppCheck
     - FirebaseAppCheckInterop
     - FirebaseAuth
     - FirebaseAuthInterop
@@ -1507,6 +1525,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/cloud_functions/ios"
   connectivity_plus:
     :path: ".symlinks/plugins/connectivity_plus/ios"
+  firebase_app_check:
+    :path: ".symlinks/plugins/firebase_app_check/ios"
   firebase_auth:
     :path: ".symlinks/plugins/firebase_auth/ios"
   firebase_core:
@@ -1530,14 +1550,17 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   abseil: a05cc83bf02079535e17169a73c5be5ba47f714b
+  AppCheckCore: cc8fd0a3a230ddd401f326489c99990b013f0c4f
   BoringSSL-GRPC: dded2a44897e45f28f08ae87a55ee4bcd19bc508
   camera_avfoundation: 968a9a5323c79a99c166ad9d7866bfd2047b5a9b
   cloud_firestore: 698d4d849c58da2ef2b3b8b9db27d2cd56614e7e
   cloud_functions: 8cfd7ba062db83be645823b41f2b42aa234bcfe3
   connectivity_plus: cb623214f4e1f6ef8fe7403d580fdad517d2f7dd
   Firebase: 065f2bb395062046623036d8e6dc857bc2521d56
+  firebase_app_check: 4d509b2df4dc9ad0aa7260a74443b4d32d852bff
   firebase_auth: 323c64eedef33fc3fdf438d16c29d2624b2ce4f4
   firebase_core: 8e6f58412ca227827c366b92e7cee047a2148c60
+  FirebaseAppCheck: 94dae4d9bb682bdef85a778b0c1024a4613f1e89
   FirebaseAppCheckInterop: 4bade10286cc977e516f75d2d8312cbdfa534789
   FirebaseAuth: 3a39f6436c21ebfd7919b698228b4f89ff94c23b
   FirebaseAuthInterop: f8f6ff72dc24621906497fbe5cf3c42ee815e59c

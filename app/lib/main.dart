@@ -1,6 +1,8 @@
 import 'package:app/core/config/bloc_factories.dart';
 import 'package:app/core/config/setup_app_check.dart';
 import 'package:app/core/config/setup_locator.dart';
+import 'package:app/core/presentation/notifications/app_notifications_controller.dart';
+import 'package:app/core/presentation/notifications/app_notifications_host.dart';
 import 'package:app/core/services/auth_functions.dart';
 import 'package:app/core/services/auth_services.dart';
 import 'package:app/core/services/auto_cache_services.dart';
@@ -22,7 +24,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_auto_cache/flutter_auto_cache.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/config/app_router.dart';
-import 'core/presentation/app_scaffold_messenger.dart';
 import 'core/presentation/theme/app_theme.dart';
 import 'core/presentation/widgets/dismiss_keyboard_on_tap.dart';
 
@@ -64,7 +65,6 @@ Future<void> main() async {
     updateUserUseCase: updateUserUseCase,
   );
   final usersBloc = createUsersBloc(
-    updateUserOnboardingStepUseCase: updateUserOnboardingStepUseCase,
     updateUserPermissionsUseCase: updateUserPermissionsUseCase,
   );
 
@@ -73,9 +73,11 @@ Future<void> main() async {
     getUserUseCase: getUserUseCase,
     createUserUseCase: createUserUseCase,
     updateUserUseCase: updateUserUseCase,
+    updateUserOnboardingStepUseCase: updateUserOnboardingStepUseCase,
     updateUserPermissionsUseCase: updateUserPermissionsUseCase,
     biometrics: getIt<IBiometricAuthService>(),
     authFunctions: getIt<AuthFunctionsService>(),
+    localCacheService: getIt<ILocalCacheService>(),
   );
 
   runApp(ParcelexApp(authBloc: authBloc, usersBloc: usersBloc));
@@ -99,13 +101,17 @@ class ParcelexApp extends StatelessWidget {
         BlocProvider<UsersBloc>.value(value: usersBloc),
       ],
       child: MaterialApp.router(
-        scaffoldMessengerKey: appScaffoldMessengerKey,
         title: 'Parceleo',
         debugShowCheckedModeBanner: false,
         theme: buildAppTheme(),
         routerConfig: _appRouter.config(),
         builder: (context, child) {
-          return DismissKeyboardOnTap(child: child);
+          return AppNotificationsHost(
+            controller: getIt<AppNotificationsController>(),
+            child: DismissKeyboardOnTap(
+              child: child ?? const SizedBox.shrink(),
+            ),
+          );
         },
       ),
     );

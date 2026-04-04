@@ -1,4 +1,4 @@
-import 'package:app/features/authentication/data/dtos/liveness_dto.dart';
+import 'package:app/features/liveness/data/dtos/liveness_dto.dart';
 
 /// Resposta de abertura de sessão de liveness (mock ou API real).
 class LivenessInitSessionResult {

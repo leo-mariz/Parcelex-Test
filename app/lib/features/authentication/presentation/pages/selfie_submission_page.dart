@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/config/app_router.gr.dart';
+import '../../../../core/presentation/notifications/app_notifications.dart';
 import '../../../../core/design_system/app_typography.dart';
 import '../../../../core/design_system/app_spacing.dart';
 import '../../../../core/design_system/ds_size.dart';
@@ -38,9 +39,7 @@ class SelfieSubmissionPage extends StatelessWidget {
           context.read<AuthBloc>().add(const InitLivenessSessionRequested());
         }
         if (state is EnableCameraPermissionError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.failure.message)),
-          );
+          showAppError(state.failure.message);
           context.read<AuthBloc>().add(const EnableCameraPermissionReset());
         }
       },

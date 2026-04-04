@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:app/core/presentation/app_scaffold_messenger.dart';
+import 'package:app/core/presentation/notifications/app_notifications.dart';
 import 'package:app/features/authentication/data/dtos/onboarding_dto.dart';
 import 'package:app/features/authentication/data/dtos/verify_sms_otp_dto.dart';
 import 'package:app/features/authentication/presentation/bloc/auth_bloc.dart';
@@ -243,12 +243,6 @@ class _SmsConfirmationPageState extends State<SmsConfirmationPage>
     return _code.length;
   }
 
-  void _showSnack(String message) {
-    appScaffoldMessengerKey.currentState?.showSnackBar(
-      SnackBar(content: Text(message)),
-    );
-  }
-
   void _handleAuthState(BuildContext context, AuthState state) {
     if (state is VerifySmsOtpLoading) {
       setState(() => _verifyPhase = OtpVerificationPhase.verifying);
@@ -291,13 +285,13 @@ class _SmsConfirmationPageState extends State<SmsConfirmationPage>
       });
       _startResendTimer();
       setState(() => _smsKeypadOffer = null);
-      _showSnack('Novo SMS enviado.');
+      showAppWarning('Novo SMS enviado.');
       context.read<AuthBloc>().add(const SendLoginSmsReset());
       return;
     }
     if (state is SendLoginSmsError) {
       setState(() => _resendLoading = false);
-      _showSnack(state.failure.message);
+      showAppError(state.failure.message);
       context.read<AuthBloc>().add(const SendLoginSmsReset());
     }
   }
@@ -367,7 +361,7 @@ class _SmsConfirmationPageState extends State<SmsConfirmationPage>
     if (_resendSeconds > 0 || _resendLoading) return;
     if (_verifyPhase == OtpVerificationPhase.verifying) return;
     if (widget.phoneNumberE164.isEmpty) {
-      _showSnack('Não foi possível reenviar o SMS.');
+      showAppError('Não foi possível reenviar o SMS.');
       return;
     }
     context.read<AuthBloc>().add(

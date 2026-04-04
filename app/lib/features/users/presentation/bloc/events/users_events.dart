@@ -1,4 +1,3 @@
-import 'package:app/core/enums/authentication/onboarding_step.dart';
 import 'package:app/features/permissions/data/dtos/permissions_dto.dart';
 import 'package:equatable/equatable.dart';
 
@@ -8,24 +7,6 @@ sealed class UsersEvent extends Equatable {
 
   @override
   List<Object?> get props => [];
-}
-
-// —— UpdateUserOnboardingStepUseCase ——
-final class UpdateUserOnboardingStepSubmitted extends UsersEvent {
-  const UpdateUserOnboardingStepSubmitted({
-    required this.userId,
-    required this.onboardingStep,
-  });
-
-  final String userId;
-  final OnboardingStep onboardingStep;
-
-  @override
-  List<Object?> get props => [userId, onboardingStep];
-}
-
-final class UpdateUserOnboardingStepReset extends UsersEvent {
-  const UpdateUserOnboardingStepReset();
 }
 
 // —— UpdateUserPermissionsUseCase ——

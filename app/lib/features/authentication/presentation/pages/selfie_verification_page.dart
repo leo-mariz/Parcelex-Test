@@ -5,18 +5,11 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../../../core/config/setup_locator.dart';
-import '../../../../core/enums/authentication/onboarding_step.dart';
-import '../../../../core/presentation/app_scaffold_messenger.dart';
 import '../../../../core/config/app_router.gr.dart';
 import '../../../../core/design_system/app_palette.dart';
 import '../../../../core/design_system/app_typography.dart';
 import '../../../../core/design_system/app_spacing.dart';
 import '../../../../core/design_system/ds_size.dart';
-import '../../../../core/services/auth_services.dart';
-import '../../../users/presentation/bloc/events/users_events.dart';
-import '../../../users/presentation/bloc/users_bloc.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/events/auth_events.dart';
 import '../bloc/states/auth_states.dart';
@@ -112,31 +105,27 @@ class _SelfieVerificationPageState extends State<SelfieVerificationPage>
         _analysisOutcomeHandlingStarted) {
       return;
     }
-    if (state is LivenessAnalysisSuccess) {
-      _applyAnalysisSuccess(state);
-    } else if (state is LivenessAnalysisError) {
+    if (state is SendLivenessSuccess) {
+      _applySendLivenessSuccess(state);
+    } else if (state is SendLivenessError) {
       _applyAnalysisFailure(message: state.failure.message);
     }
   }
 
-  void _applyAnalysisSuccess(LivenessAnalysisSuccess state) {
+  void _applySendLivenessSuccess(SendLivenessSuccess state) {
     if (!mounted ||
         _phase != _VerificationPhase.analyzing ||
         _analysisOutcomeHandlingStarted) {
       return;
     }
     _analysisOutcomeHandlingStarted = true;
-    final passed = state.result.passed;
-    final failureDetail =
-        state.result.failureReason ?? 'Verificação não aprovada.';
 
     _runOutcomeSequence(
       showIconsAndThenEnd: () {
         if (!mounted) return;
         setState(() {
-          _phase =
-              passed ? _VerificationPhase.success : _VerificationPhase.error;
-          _errorDetail = passed ? null : failureDetail;
+          _phase = _VerificationPhase.success;
+          _errorDetail = null;
         });
 
         _outcomeChainTimer = Timer(
@@ -144,32 +133,7 @@ class _SelfieVerificationPageState extends State<SelfieVerificationPage>
           () {
             _outcomeChainTimer = null;
             if (!mounted) return;
-            if (passed) {
-              final uid = getIt<AuthService>().currentUser?.uid;
-              if (uid != null && uid.isNotEmpty) {
-                context.read<UsersBloc>().add(
-                      UpdateUserOnboardingStepSubmitted(
-                        userId: uid,
-                        onboardingStep: OnboardingStep.permissions,
-                      ),
-                    );
-                if (!mounted) return;
-                context.router.replace(
-                  AuthLoadingRoute(
-                    cpfMasked: '',
-                    awaitingOnboardingStepUpdate: true,
-                  ),
-                );
-              } else {
-                appScaffoldMessengerKey.currentState?.showSnackBar(
-                  const SnackBar(
-                    content: Text('Sessão inválida. Faça login novamente.'),
-                  ),
-                );
-              }
-            } else {
-              unawaited(_popBackToSelfieSubmission());
-            }
+            context.router.replace(const NotificationPermissionRoute());
           },
         );
       },
@@ -216,7 +180,7 @@ class _SelfieVerificationPageState extends State<SelfieVerificationPage>
   void dispose() {
     _cancelOutcomeChain();
     _countdownController.dispose();
-    _authBloc?.add(const LivenessAnalysisReset());
+    _authBloc?.add(const SendLivenessReset());
     super.dispose();
   }
 
@@ -227,12 +191,11 @@ class _SelfieVerificationPageState extends State<SelfieVerificationPage>
 
     return BlocListener<AuthBloc, AuthState>(
       listenWhen: (prev, current) =>
-          current is LivenessAnalysisSuccess ||
-          current is LivenessAnalysisError,
+          current is SendLivenessSuccess || current is SendLivenessError,
       listener: (context, state) {
-        if (state is LivenessAnalysisSuccess) {
-          _applyAnalysisSuccess(state);
-        } else if (state is LivenessAnalysisError) {
+        if (state is SendLivenessSuccess) {
+          _applySendLivenessSuccess(state);
+        } else if (state is SendLivenessError) {
           _applyAnalysisFailure(message: state.failure.message);
         }
       },
@@ -340,13 +303,13 @@ class _SelfieVerificationPageState extends State<SelfieVerificationPage>
                     padding: EdgeInsets.only(bottom: DSSize.height(12)),
                     child: BlocBuilder<AuthBloc, AuthState>(
                       buildWhen: (p, c) =>
-                          c is LivenessAnalysisLoading ||
-                          c is LivenessAnalysisSuccess ||
-                          c is LivenessAnalysisError ||
-                          c is LivenessAnalysisInitial,
+                          c is SendLivenessLoading ||
+                          c is SendLivenessSuccess ||
+                          c is SendLivenessError ||
+                          c is SendLivenessInitial,
                       builder: (context, state) {
                         return Text(
-                          'Debug: AuthBloc liveness = ${state.runtimeType}',
+                          'Debug: AuthBloc sendLiveness = ${state.runtimeType}',
                           textAlign: TextAlign.center,
                           style: typo.bodyMedium400.copyWith(
                             color: Theme.of(context)

@@ -1,3 +1,4 @@
+import 'package:app/core/presentation/notifications/app_notifications_controller.dart';
 import 'package:app/core/services/auth_functions.dart';
 import 'package:app/core/services/auth_services.dart';
 import 'package:app/core/services/face_framing_detector.dart';
@@ -17,6 +18,10 @@ final getIt = GetIt.instance;
 /// Serviços e infra compartilhada. Datasources, repositórios, use cases e Blocs
 /// são montados no [main] (ver [createAuthBloc] em `bloc_factories.dart`).
 void setupLocator() {
+  getIt.registerLazySingleton<AppNotificationsController>(
+    AppNotificationsController.new,
+  );
+
   getIt.registerLazySingleton<AuthService>(
     () => FirebaseAuthService(FirebaseAuth.instance),
   );

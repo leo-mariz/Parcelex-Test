@@ -15,30 +15,6 @@ final class UsersInitial extends UsersState {
   const UsersInitial();
 }
 
-// —— UpdateUserOnboardingStepUseCase ——
-
-final class UpdateUserOnboardingStepLoading extends UsersState {
-  const UpdateUserOnboardingStepLoading();
-}
-
-final class UpdateUserOnboardingStepSuccess extends UsersState {
-  const UpdateUserOnboardingStepSuccess(this.user);
-
-  final UserEntity user;
-
-  @override
-  List<Object?> get props => [user];
-}
-
-final class UpdateUserOnboardingStepError extends UsersState {
-  const UpdateUserOnboardingStepError(this.failure);
-
-  final Failure failure;
-
-  @override
-  List<Object?> get props => [failure];
-}
-
 // —— UpdateUserPermissionsUseCase ——
 
 final class UpdateUserPermissionsLoading extends UsersState {

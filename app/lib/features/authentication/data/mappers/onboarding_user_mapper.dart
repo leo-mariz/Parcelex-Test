@@ -12,7 +12,7 @@ UserEntity userEntityFromOnboardingDto({
     email: dto.email,
     phoneNumber: dto.phoneDigits,
     fullName: dto.fullName,
-    onboardingStep: OnboardingStep.profileComplete,
+    onboardingStep: OnboardingStep.liveness,
     cpf: dto.cpfDigits,
     createdAt: now,
     updatedAt: now,

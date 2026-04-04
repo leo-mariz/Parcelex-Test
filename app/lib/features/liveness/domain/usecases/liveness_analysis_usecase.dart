@@ -1,7 +1,7 @@
 import 'package:app/core/errors/error_handler.dart';
 import 'package:app/core/errors/failures.dart';
 import 'package:app/core/services/liveness_api_service.dart';
-import 'package:app/features/authentication/data/dtos/liveness_dto.dart';
+import 'package:app/features/liveness/data/dtos/liveness_dto.dart';
 import 'package:fpdart/fpdart.dart';
 
 /// Envia captura de liveness para [LivenessApiService] (mock ou cliente real).

@@ -10,7 +10,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/config/app_router.gr.dart';
 import '../../../../core/config/setup_locator.dart';
 import '../../../../core/constants/app_assets.dart';
-import '../../../../core/presentation/app_scaffold_messenger.dart';
+import '../../../../core/presentation/notifications/app_notifications.dart';
 import '../../../../core/services/auth_services.dart';
 import '../../../../core/design_system/app_typography.dart';
 import '../../../../core/design_system/app_palette.dart';
@@ -20,10 +20,10 @@ import '../../../../core/enums/face_framing/face_framing_phase.dart';
 import '../../../../core/models/face_framing_snapshot.dart';
 import '../../../../core/presentation/widgets/app_circle_close_button.dart';
 import '../../../../core/services/face_framing_detector.dart';
-import '../../data/dtos/liveness_dto.dart';
+import '../../../liveness/data/dtos/liveness_dto.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/events/auth_events.dart';
-import '../bloc/face_framing_cubit.dart';
+import '../../../liveness/presentation/cubit/face_framing_cubit.dart';
 
 /// Fração da largura da tela para a elipse base (referência entre etapas 1 e 2).
 const double _kLivenessOvalWidthFraction = 0.62;
@@ -176,9 +176,7 @@ class _SelfieLivenessContentState extends State<_SelfieLivenessContent>
     final uid = getIt<AuthService>().currentUser?.uid;
     if (uid == null || uid.isEmpty) {
       _analysisDispatched = false;
-      appScaffoldMessengerKey.currentState?.showSnackBar(
-        const SnackBar(content: Text('Sessão inválida. Faça login novamente.')),
-      );
+      showAppError('Sessão inválida. Faça login novamente.');
       return;
     }
 
@@ -192,7 +190,7 @@ class _SelfieLivenessContentState extends State<_SelfieLivenessContent>
     }
 
     context.read<AuthBloc>().add(
-          LivenessAnalysisRequested(
+          SendLivenessRequested(
             LivenessDto(
               userId: uid,
               providerSessionId: widget.providerSessionId,

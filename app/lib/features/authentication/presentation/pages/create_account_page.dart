@@ -5,7 +5,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/config/app_router.gr.dart';
-import '../../../../core/presentation/app_scaffold_messenger.dart';
+import '../../../../core/presentation/notifications/app_notifications.dart';
 import '../../../../core/utils/cpf_digits_validator.dart';
 import '../../../../core/utils/email_simple_validator.dart';
 import '../../../../core/design_system/app_typography.dart';
@@ -51,16 +51,14 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     super.dispose();
   }
 
-  void _showSnack(String message) {
-    appScaffoldMessengerKey.currentState?.showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+  void _showValidation(String message) {
+    showAppWarning(message);
   }
 
   void _onContinue() {
     final cpfDigits = widget.cpfMasked.replaceAll(RegExp(r'\D'), '');
     if (cpfDigits.length != 11 || !isValidBrazilianCpfDigits(cpfDigits)) {
-      _showSnack('CPF inválido. Volte e informe novamente.');
+      _showValidation('CPF inválido. Volte e informe novamente.');
       return;
     }
 
@@ -70,33 +68,33 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     final cepDigits = _cepController.text.replaceAll(RegExp(r'\D'), '');
 
     if (fullName.isEmpty) {
-      _showSnack('Informe o nome completo.');
+      _showValidation('Informe o nome completo.');
       return;
     }
     final nameParts =
         fullName.split(RegExp(r'\s+')).where((p) => p.isNotEmpty).length;
     if (nameParts < 2) {
-      _showSnack('Informe nome e sobrenome.');
+      _showValidation('Informe nome e sobrenome.');
       return;
     }
     if (email.isEmpty) {
-      _showSnack('Informe o e-mail.');
+      _showValidation('Informe o e-mail.');
       return;
     }
     if (!isValidEmailFormat(email)) {
-      _showSnack('Informe um e-mail válido.');
+      _showValidation('Informe um e-mail válido.');
       return;
     }
     if (phoneDigits.length < 10 || phoneDigits.length > 11) {
-      _showSnack('Informe um telefone com DDD (10 ou 11 dígitos).');
+      _showValidation('Informe um telefone com DDD (10 ou 11 dígitos).');
       return;
     }
     if (cepDigits.length != 8) {
-      _showSnack('Informe um CEP com 8 dígitos.');
+      _showValidation('Informe um CEP com 8 dígitos.');
       return;
     }
     if (_signedWorker == null) {
-      _showSnack('Responda se você é trabalhador de carteira assinada.');
+      _showValidation('Responda se você é trabalhador de carteira assinada.');
       return;
     }
 
@@ -122,7 +120,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   }
 
   void _stubLink(String name) {
-    _showSnack('$name — em breve');
+    _showValidation('$name — em breve');
   }
 
   @override

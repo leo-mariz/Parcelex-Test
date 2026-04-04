@@ -1,6 +1,7 @@
 import 'package:app/core/config/setup_locator.dart';
 import 'package:app/core/services/auth_functions.dart';
 import 'package:app/core/services/auth_services.dart';
+import 'package:app/core/services/auto_cache_services.dart';
 import 'package:app/core/services/biometrics_services.dart';
 import 'package:app/core/services/liveness_api_service.dart';
 import 'package:app/features/permissions/domain/usecases/enable_biometrics_usecase.dart';
@@ -8,8 +9,10 @@ import 'package:app/features/authentication/domain/usecases/get_user_uid_usecase
 import 'package:app/features/permissions/domain/usecases/enable_camera_permission_usecase.dart';
 import 'package:app/features/permissions/domain/usecases/enable_localization_usecase.dart';
 import 'package:app/features/permissions/domain/usecases/enable_notifications_usecase.dart';
-import 'package:app/features/authentication/domain/usecases/init_liveness_session_usecase.dart';
-import 'package:app/features/authentication/domain/usecases/liveness_analysis_usecase.dart';
+import 'package:app/features/liveness/domain/usecases/init_liveness_session_usecase.dart';
+import 'package:app/features/authentication/domain/usecases/send_liveness_usecase.dart';
+import 'package:app/features/liveness/domain/usecases/liveness_analysis_usecase.dart';
+import 'package:app/features/authentication/domain/usecases/logout_usecase.dart';
 import 'package:app/features/authentication/domain/usecases/register_onboarding_usecase.dart';
 import 'package:app/features/authentication/domain/usecases/send_login_sms_usecase.dart';
 import 'package:app/features/authentication/domain/usecases/save_permissions_preferences_usecase.dart';
@@ -31,7 +34,9 @@ AuthBloc createAuthBloc({
   required GetUserUseCase getUserUseCase,
   required CreateUserUseCase createUserUseCase,
   required UpdateUserUseCase updateUserUseCase,
+  required UpdateUserOnboardingStepUseCase updateUserOnboardingStepUseCase,
   required UpdateUserPermissionsUseCase updateUserPermissionsUseCase,
+  required ILocalCacheService localCacheService,
 }) {
   final verifyCpfUseCase = VerifyCpfUseCase(
     authFunctions: authFunctions,
@@ -53,6 +58,10 @@ AuthBloc createAuthBloc({
   final livenessAnalysisUseCase = LivenessAnalysisUseCase(
     livenessApi: getIt<LivenessApiService>(),
   );
+  final sendLivenessUseCase = SendLivenessUseCase(
+    livenessAnalysisUseCase: livenessAnalysisUseCase,
+    updateUserOnboardingStepUseCase: updateUserOnboardingStepUseCase,
+  );
   final enableCameraPermissionUseCase = EnableCameraPermissionUseCase();
   final enableBiometricsUseCase = EnableBiometricsUseCase(
     biometrics: biometrics,
@@ -62,6 +71,7 @@ AuthBloc createAuthBloc({
   final savePermissionsPreferencesUseCase = SavePermissionsPreferencesUseCase(
     updateUserPermissionsUseCase: updateUserPermissionsUseCase,
   );
+  final logoutUseCase = LogoutUseCase(authService: authService, localCacheService: localCacheService);
 
   return AuthBloc(
     verifyCpfUseCase: verifyCpfUseCase,
@@ -70,21 +80,20 @@ AuthBloc createAuthBloc({
     sendLoginSmsUseCase: sendLoginSmsUseCase,
     getUserUidUseCase: getUserUidUseCase,
     initLivenessSessionUseCase: initLivenessSessionUseCase,
-    livenessAnalysisUseCase: livenessAnalysisUseCase,
+    sendLivenessUseCase: sendLivenessUseCase,
     enableCameraPermissionUseCase: enableCameraPermissionUseCase,
     enableBiometricsUseCase: enableBiometricsUseCase,
     enableNotificationsUseCase: enableNotificationsUseCase,
     enableLocalizationUseCase: enableLocalizationUseCase,
     savePermissionsPreferencesUseCase: savePermissionsPreferencesUseCase,
+    logoutUseCase: logoutUseCase,
   );
 }
 
 UsersBloc createUsersBloc({
-  required UpdateUserOnboardingStepUseCase updateUserOnboardingStepUseCase,
   required UpdateUserPermissionsUseCase updateUserPermissionsUseCase,
 }) {
   return UsersBloc(
-    updateUserOnboardingStepUseCase: updateUserOnboardingStepUseCase,
     updateUserPermissionsUseCase: updateUserPermissionsUseCase,
   );
 }

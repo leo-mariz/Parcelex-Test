@@ -30,7 +30,8 @@ abstract class AuthService {
 
   Stream<User?> authStateChanges();
 
-  Future<void> signOut();
+  /// Encerra a sessão Firebase (revoga credenciais locais).
+  Future<void> logout();
 
   /// Dispara o SMS com o código. Guarde [SmsSignInChallenge.verificationId] para [verifySmsOtp].
   ///
@@ -66,7 +67,7 @@ class FirebaseAuthService implements AuthService {
   Stream<User?> authStateChanges() => _auth.authStateChanges();
 
   @override
-  Future<void> signOut() => _auth.signOut();
+  Future<void> logout() => _auth.signOut();
 
   @override
   Future<SmsSignInChallenge> signInWithSms(

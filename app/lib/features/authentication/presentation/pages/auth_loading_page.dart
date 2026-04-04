@@ -1,4 +1,4 @@
-import 'package:app/core/presentation/app_scaffold_messenger.dart';
+import 'package:app/core/presentation/notifications/app_notifications.dart';
 import 'package:app/core/utils/phone_display_mask.dart';
 import 'package:app/features/permissions/data/dtos/permissions_dto.dart';
 import 'package:app/features/authentication/presentation/bloc/auth_bloc.dart';
@@ -24,7 +24,6 @@ class AuthLoadingPage extends StatefulWidget {
     required this.cpfMasked,
     this.isRegisterOnboarding = false,
     this.awaitingLivenessInit = false,
-    this.awaitingOnboardingStepUpdate = false,
     this.awaitingUserPermissionsUpdate = false,
     this.permissionsDto,
   });
@@ -38,9 +37,6 @@ class AuthLoadingPage extends StatefulWidget {
 
   /// `true`: aguarda [InitLivenessSessionRequested] (selfie → sessão de liveness).
   final bool awaitingLivenessInit;
-
-  /// `true`: aguarda [UpdateUserOnboardingStepSubmitted] (pós-verificação selfie).
-  final bool awaitingOnboardingStepUpdate;
 
   /// `true`: dispara [UpdateUserPermissionsSubmitted] com [permissionsDto] e aguarda o [UsersBloc].
   final bool awaitingUserPermissionsUpdate;
@@ -67,16 +63,12 @@ class _AuthLoadingPageState extends State<AuthLoadingPage> {
   bool _handledRegisterOnboardingSuccess = false;
   bool _handledInitLivenessSuccess = false;
   bool _handledInitLivenessError = false;
-  bool _handledOnboardingStepUpdateSuccess = false;
-  bool _handledOnboardingStepUpdateError = false;
   bool _userPermissionsSubmitDispatched = false;
   bool _handledUserPermissionsSuccess = false;
   bool _handledUserPermissionsError = false;
 
   void _showRootSnackBar(String message) {
-    appScaffoldMessengerKey.currentState?.showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    showAppError(message);
   }
 
   /// Garante que o loading fique visível pelo menos [_minLoadingVisible] (UX).
@@ -92,29 +84,6 @@ class _AuthLoadingPageState extends State<AuthLoadingPage> {
       run();
     } else {
       Future<void>.delayed(remaining, run);
-    }
-  }
-
-  void _processUsersState(BuildContext context, UsersState state) {
-    if (!widget.awaitingOnboardingStepUpdate) return;
-    if (state is UpdateUserOnboardingStepError) {
-      if (_handledOnboardingStepUpdateError) return;
-      _handledOnboardingStepUpdateError = true;
-      final message = state.failure.message;
-      _afterMinLoading(() {
-        context.read<UsersBloc>().add(const UpdateUserOnboardingStepReset());
-        context.router.maybePop();
-        _showRootSnackBar(message);
-      });
-      return;
-    }
-    if (state is UpdateUserOnboardingStepSuccess) {
-      if (_handledOnboardingStepUpdateSuccess) return;
-      _handledOnboardingStepUpdateSuccess = true;
-      _afterMinLoading(() {
-        context.read<UsersBloc>().add(const UpdateUserOnboardingStepReset());
-        context.router.replace(const NotificationPermissionRoute());
-      });
     }
   }
 
@@ -303,14 +272,6 @@ class _AuthLoadingPageState extends State<AuthLoadingPage> {
         }
         return;
       }
-      if (widget.awaitingOnboardingStepUpdate) {
-        final us = context.read<UsersBloc>().state;
-        if (us is UpdateUserOnboardingStepError ||
-            us is UpdateUserOnboardingStepSuccess) {
-          _processUsersState(context, us);
-        }
-        return;
-      }
       final s = context.read<AuthBloc>().state;
       if (widget.awaitingLivenessInit) {
         if (s is InitLivenessSessionError || s is InitLivenessSessionSuccess) {
@@ -337,10 +298,6 @@ class _AuthLoadingPageState extends State<AuthLoadingPage> {
   Widget build(BuildContext context) {
     return BlocListener<UsersBloc, UsersState>(
       listenWhen: (previous, current) {
-        if (widget.awaitingOnboardingStepUpdate) {
-          return current is UpdateUserOnboardingStepSuccess ||
-              current is UpdateUserOnboardingStepError;
-        }
         if (widget.awaitingUserPermissionsUpdate) {
           return current is UpdateUserPermissionsSuccess ||
               current is UpdateUserPermissionsError;
@@ -348,16 +305,13 @@ class _AuthLoadingPageState extends State<AuthLoadingPage> {
         return false;
       },
       listener: (context, state) {
-        if (widget.awaitingOnboardingStepUpdate) {
-          _processUsersState(context, state);
-        } else if (widget.awaitingUserPermissionsUpdate) {
+        if (widget.awaitingUserPermissionsUpdate) {
           _processUserPermissionsState(context, state);
         }
       },
       child: BlocListener<AuthBloc, AuthState>(
         listenWhen: (previous, current) {
-          if (widget.awaitingOnboardingStepUpdate ||
-              widget.awaitingUserPermissionsUpdate) {
+          if (widget.awaitingUserPermissionsUpdate) {
             return false;
           }
           if (widget.awaitingLivenessInit) {

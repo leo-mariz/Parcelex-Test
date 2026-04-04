@@ -13,7 +13,7 @@ PageRouteInfo<Object?> routeAfterOtpSuccess({UserEntity? userProfile}) {
 
   switch (step) {
     case OnboardingStep.none:
-    case OnboardingStep.selfie:
+    case OnboardingStep.liveness:
       return const SelfieSubmissionRoute();
     case OnboardingStep.permissions:
       return const NotificationPermissionRoute();

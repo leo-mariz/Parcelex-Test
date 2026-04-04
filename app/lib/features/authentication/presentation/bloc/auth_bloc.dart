@@ -4,11 +4,12 @@ import 'package:app/features/permissions/domain/usecases/enable_biometrics_useca
 import 'package:app/features/permissions/domain/usecases/enable_camera_permission_usecase.dart';
 import 'package:app/features/permissions/domain/usecases/enable_localization_usecase.dart';
 import 'package:app/features/permissions/domain/usecases/enable_notifications_usecase.dart';
-import 'package:app/features/authentication/domain/usecases/init_liveness_session_usecase.dart';
-import 'package:app/features/authentication/domain/usecases/liveness_analysis_usecase.dart';
+import 'package:app/features/liveness/domain/usecases/init_liveness_session_usecase.dart';
+import 'package:app/features/authentication/domain/usecases/send_liveness_usecase.dart';
 import 'package:app/features/authentication/domain/usecases/register_onboarding_usecase.dart';
 import 'package:app/features/authentication/domain/usecases/send_login_sms_usecase.dart';
 import 'package:app/features/authentication/domain/usecases/save_permissions_preferences_usecase.dart';
+import 'package:app/features/authentication/domain/usecases/logout_usecase.dart';
 import 'package:app/features/authentication/domain/usecases/verify_cpf_usecase.dart';
 import 'package:app/features/authentication/domain/usecases/verify_sms_otp_usecase.dart';
 import 'package:app/features/authentication/presentation/bloc/events/auth_events.dart';
@@ -24,12 +25,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.sendLoginSmsUseCase,
     required this.getUserUidUseCase,
     required this.initLivenessSessionUseCase,
-    required this.livenessAnalysisUseCase,
+    required this.sendLivenessUseCase,
     required this.enableCameraPermissionUseCase,
     required this.enableBiometricsUseCase,
     required this.enableNotificationsUseCase,
     required this.enableLocalizationUseCase,
     required this.savePermissionsPreferencesUseCase,
+    required this.logoutUseCase,
   }) : super(const AuthInitial()) {
     on<VerifyCpfSubmitted>(_onVerifyCpfSubmitted);
     on<VerifyCpfReset>(_onVerifyCpfReset);
@@ -41,8 +43,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<SendLoginSmsReset>(_onSendLoginSmsReset);
     on<InitLivenessSessionRequested>(_onInitLivenessSessionRequested);
     on<InitLivenessSessionReset>(_onInitLivenessSessionReset);
-    on<LivenessAnalysisRequested>(_onLivenessAnalysisRequested);
-    on<LivenessAnalysisReset>(_onLivenessAnalysisReset);
+    on<SendLivenessRequested>(_onSendLivenessRequested);
+    on<SendLivenessReset>(_onSendLivenessReset);
     on<EnableCameraPermissionRequested>(_onEnableCameraPermissionRequested);
     on<EnableCameraPermissionReset>(_onEnableCameraPermissionReset);
     on<EnableBiometricsRequested>(_onEnableBiometricsRequested);
@@ -55,6 +57,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       _onSavePermissionsPreferencesSubmitted,
     );
     on<SavePermissionsPreferencesReset>(_onSavePermissionsPreferencesReset);
+    on<LogoutRequested>(_onLogoutRequested);
+    on<LogoutReset>(_onLogoutReset);
   }
 
   final VerifyCpfUseCase verifyCpfUseCase;
@@ -63,12 +67,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SendLoginSmsUseCase sendLoginSmsUseCase;
   final GetUserUidUseCase getUserUidUseCase;
   final InitLivenessSessionUseCase initLivenessSessionUseCase;
-  final LivenessAnalysisUseCase livenessAnalysisUseCase;
+  final SendLivenessUseCase sendLivenessUseCase;
   final EnableCameraPermissionUseCase enableCameraPermissionUseCase;
   final EnableBiometricsUseCase enableBiometricsUseCase;
   final EnableNotificationsUseCase enableNotificationsUseCase;
   final EnableLocalizationUseCase enableLocalizationUseCase;
   final SavePermissionsPreferencesUseCase savePermissionsPreferencesUseCase;
+  final LogoutUseCase logoutUseCase;
 
   // —— VerifyCpf ——————————————————————————————————————————————————
 
@@ -229,31 +234,31 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(const InitLivenessSessionInitial());
   }
 
-  // —— LivenessAnalysis ———————————————————————————————————————————
+  // —— SendLiveness ——————————————————————————————————————————————
 
-  Future<void> _onLivenessAnalysisRequested(
-    LivenessAnalysisRequested event,
+  Future<void> _onSendLivenessRequested(
+    SendLivenessRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(const LivenessAnalysisLoading());
+    emit(const SendLivenessLoading());
 
-    final result = await livenessAnalysisUseCase.call(event.dto);
+    final result = await sendLivenessUseCase.call(event.dto);
 
     result.fold(
       (failure) {
-        emit(LivenessAnalysisError(failure));
+        emit(SendLivenessError(failure));
       },
-      (data) {
-        emit(LivenessAnalysisSuccess(data));
+      (user) {
+        emit(SendLivenessSuccess(user));
       },
     );
   }
 
-  void _onLivenessAnalysisReset(
-    LivenessAnalysisReset event,
+  void _onSendLivenessReset(
+    SendLivenessReset event,
     Emitter<AuthState> emit,
   ) {
-    emit(const LivenessAnalysisInitial());
+    emit(const SendLivenessInitial());
   }
 
   // —— EnableCameraPermission —————————————————————————————————————
@@ -397,5 +402,31 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) {
     emit(const SavePermissionsPreferencesInitial());
+  }
+
+  // —— Logout ——————————————————————————————————————————————————————
+
+  Future<void> _onLogoutRequested(
+    LogoutRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(const LogoutLoading());
+
+    final result = await logoutUseCase.call();
+
+    result.fold(
+      (failure) {
+        emit(LogoutError(failure));
+        emit(const AuthInitial());
+      },
+      (_) => emit(const LogoutSuccess()),
+    );
+  }
+
+  void _onLogoutReset(
+    LogoutReset event,
+    Emitter<AuthState> emit,
+  ) {
+    emit(const AuthInitial());
   }
 }

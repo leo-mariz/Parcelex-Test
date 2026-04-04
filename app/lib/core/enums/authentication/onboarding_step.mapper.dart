@@ -29,16 +29,10 @@ class OnboardingStepMapper extends EnumMapper<OnboardingStep> {
     switch (value) {
       case r'none':
         return OnboardingStep.none;
-      case r'emailOtpPending':
-        return OnboardingStep.emailOtpPending;
       case r'profileComplete':
         return OnboardingStep.profileComplete;
-      case r'selfie':
-        return OnboardingStep.selfie;
       case r'liveness':
         return OnboardingStep.liveness;
-      case r'verification':
-        return OnboardingStep.verification;
       case r'permissions':
         return OnboardingStep.permissions;
       case r'done':
@@ -53,16 +47,10 @@ class OnboardingStepMapper extends EnumMapper<OnboardingStep> {
     switch (self) {
       case OnboardingStep.none:
         return r'none';
-      case OnboardingStep.emailOtpPending:
-        return r'emailOtpPending';
       case OnboardingStep.profileComplete:
         return r'profileComplete';
-      case OnboardingStep.selfie:
-        return r'selfie';
       case OnboardingStep.liveness:
         return r'liveness';
-      case OnboardingStep.verification:
-        return r'verification';
       case OnboardingStep.permissions:
         return r'permissions';
       case OnboardingStep.done:

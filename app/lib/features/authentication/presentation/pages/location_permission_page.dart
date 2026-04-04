@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:app/core/design_system/app_palette.dart';
+import 'package:app/core/presentation/notifications/app_notifications.dart';
 import 'package:app/core/presentation/widgets/app_skip_chip.dart';
 import 'package:app/features/permissions/data/dtos/permissions_dto.dart';
 import 'package:auto_route/auto_route.dart';
@@ -62,31 +63,21 @@ class _LocationPermissionPageState extends State<LocationPermissionPage> {
     final result = permissionPromptResultFromPermissionStatus(status);
 
     if (status == PermissionStatus.granted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Localização ativada.')),
-      );
+      showAppWarning('Localização ativada.');
       unawaited(_submitPermissions(result));
       return;
     }
 
     if (status == PermissionStatus.permanentlyDenied) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Você pode ativar a localização nas configurações do app quando quiser.',
-          ),
-        ),
+      showAppWarning(
+        'Você pode ativar a localização nas configurações do app quando quiser.',
       );
       unawaited(_submitPermissions(result));
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Sem localização, as ofertas podem ser menos relevantes para você.',
-        ),
-      ),
+    showAppWarning(
+      'Sem localização, as ofertas podem ser menos relevantes para você.',
     );
     unawaited(_submitPermissions(result));
   }

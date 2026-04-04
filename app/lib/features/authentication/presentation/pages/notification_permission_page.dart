@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:app/core/design_system/app_palette.dart';
+import 'package:app/core/presentation/notifications/app_notifications.dart';
 import 'package:app/features/permissions/data/dtos/permissions_dto.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
@@ -48,29 +49,21 @@ class _NotificationPermissionPageState
     final result = permissionPromptResultFromPermissionStatus(status);
 
     if (status == PermissionStatus.granted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Notificações ativadas.')),
-      );
+      showAppWarning('Notificações ativadas.');
       unawaited(_goToBiometricStep(result));
       return;
     }
 
     if (status == PermissionStatus.permanentlyDenied) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Ative as notificações nas configurações do app se mudar de ideia.',
-          ),
-        ),
+      showAppWarning(
+        'Ative as notificações nas configurações do app se mudar de ideia.',
       );
       unawaited(_goToBiometricStep(result));
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Sem notificações, você pode perder avisos importantes.'),
-      ),
+    showAppWarning(
+      'Sem notificações, você pode perder avisos importantes.',
     );
     unawaited(_goToBiometricStep(result));
   }

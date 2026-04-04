@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:app/core/config/app_router.gr.dart';
+import 'package:app/core/presentation/notifications/app_notifications.dart';
 import 'package:app/core/config/setup_locator.dart';
 import 'package:app/core/design_system/app_palette.dart';
 import 'package:app/core/presentation/widgets/app_skip_chip.dart';
@@ -54,13 +55,9 @@ class _BiometricPermissionPageState extends State<BiometricPermissionPage> {
     if (!available) {
       if (!mounted) return;
       setState(() => _busy = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Biometria indisponível neste aparelho ou não configurada nas '
-            'configurações do sistema.',
-          ),
-        ),
+      showAppWarning(
+        'Biometria indisponível neste aparelho ou não configurada nas '
+        'configurações do sistema.',
       );
       unawaited(_goToLocationStep(PermissionPromptResult.skipped));
       return;
@@ -74,17 +71,11 @@ class _BiometricPermissionPageState extends State<BiometricPermissionPage> {
         ok ? PermissionPromptResult.granted : PermissionPromptResult.denied;
 
     if (ok) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Biometria habilitada para o app.')),
-      );
+      showAppWarning('Biometria habilitada para o app.');
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Biometria não confirmada. Você pode tentar de novo ou usar outro '
-            'método de acesso.',
-          ),
-        ),
+      showAppWarning(
+        'Biometria não confirmada. Você pode tentar de novo ou usar outro '
+        'método de acesso.',
       );
     }
     unawaited(_goToLocationStep(biometricResult));

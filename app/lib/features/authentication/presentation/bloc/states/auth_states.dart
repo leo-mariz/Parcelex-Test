@@ -1,5 +1,6 @@
 import 'package:app/core/errors/failures.dart';
-import 'package:app/core/services/liveness_api_service.dart';
+import 'package:app/core/services/liveness_api_service.dart'
+    show LivenessInitSessionResult;
 import 'package:app/features/authentication/data/dtos/register_onboarding_response_dto.dart';
 import 'package:app/features/authentication/data/dtos/send_login_sms_response_dto.dart';
 import 'package:app/features/authentication/data/dtos/verify_sms_otp_response_dto.dart';
@@ -161,26 +162,44 @@ final class InitLivenessSessionError extends AuthState {
   List<Object?> get props => [failure];
 }
 
-// —— LivenessAnalysisUseCase ——
-final class LivenessAnalysisInitial extends AuthState {
-  const LivenessAnalysisInitial();
+// —— SendLivenessUseCase ——
+final class SendLivenessInitial extends AuthState {
+  const SendLivenessInitial();
 }
 
-final class LivenessAnalysisLoading extends AuthState {
-  const LivenessAnalysisLoading();
+final class SendLivenessLoading extends AuthState {
+  const SendLivenessLoading();
 }
 
-final class LivenessAnalysisSuccess extends AuthState {
-  const LivenessAnalysisSuccess(this.result);
+final class SendLivenessSuccess extends AuthState {
+  const SendLivenessSuccess(this.user);
 
-  final LivenessAnalysisResult result;
+  final UserEntity user;
 
   @override
-  List<Object?> get props => [result];
+  List<Object?> get props => [user];
 }
 
-final class LivenessAnalysisError extends AuthState {
-  const LivenessAnalysisError(this.failure);
+final class SendLivenessError extends AuthState {
+  const SendLivenessError(this.failure);
+
+  final Failure failure;
+
+  @override
+  List<Object?> get props => [failure];
+}
+
+// —— LogoutUseCase ——
+final class LogoutLoading extends AuthState {
+  const LogoutLoading();
+}
+
+final class LogoutSuccess extends AuthState {
+  const LogoutSuccess();
+}
+
+final class LogoutError extends AuthState {
+  const LogoutError(this.failure);
 
   final Failure failure;
 
