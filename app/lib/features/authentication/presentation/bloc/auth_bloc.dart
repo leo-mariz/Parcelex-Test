@@ -209,18 +209,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     await uidResult.fold(
       (failure) async {
         emit(InitLivenessSessionError(failure));
-        emit(const InitLivenessSessionInitial());
       },
       (uid) async {
         final sessionResult = await initLivenessSessionUseCase.call(uid);
         sessionResult.fold(
           (failure) {
             emit(InitLivenessSessionError(failure));
-            emit(const InitLivenessSessionInitial());
           },
           (data) {
             emit(InitLivenessSessionSuccess(data));
-            emit(const InitLivenessSessionInitial());
           },
         );
       },

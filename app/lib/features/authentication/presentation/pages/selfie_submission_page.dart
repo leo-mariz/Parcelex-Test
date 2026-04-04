@@ -30,13 +30,15 @@ class SelfieSubmissionPage extends StatelessWidget {
           current is EnableCameraPermissionError,
       listener: (context, state) {
         if (state is EnableCameraPermissionSuccess) {
+          // Dispara antes do push: a sessão costuma completar rápido (mock); o BLoC
+          // mantém Success/Error até [InitLivenessSessionReset] na AuthLoadingPage.
+          context.read<AuthBloc>().add(const InitLivenessSessionRequested());
           context.router.push(
             AuthLoadingRoute(
               cpfMasked: '',
               awaitingLivenessInit: true,
             ),
           );
-          context.read<AuthBloc>().add(const InitLivenessSessionRequested());
         }
         if (state is EnableCameraPermissionError) {
           showAppError(state.failure.message);
